@@ -5,11 +5,11 @@ const router = express.Router();
 
 const contactsOperations = require('../../models/contacts');
 
-const contactSchema = Joi.object({
-    name: Joi.string().required(),
-    email: Joi.string().email({ minDomainSegments: 2 }).required(),
-    phone: Joi.string().required(),
-});
+const { validationBody } = require('../../middlewares/validationBody');
+const { addContactSchema } = require('../../schemas/addContactValidation');
+const {
+    updateContactSchema,
+} = require('../../schemas/updateContactValidation');
 
 router.get('/', async (req, res, next) => {
     try {
@@ -38,16 +38,8 @@ router.get('/:contactId', async (req, res, next) => {
     }
 });
 
-router.post('/', async (req, res, next) => {
+router.post('/', validationBody(addContactSchema), async (req, res, next) => {
     try {
-        const { error } = contactSchema.validate(req.body);
-
-        if (error) {
-            error.status = 400;
-            error.message = `missing required ${error.details[0].context.label} field`;
-            throw error;
-        }
-
         const createdContact = await contactsOperations.addContact(req.body);
 
         res.status(201).json(createdContact);
@@ -76,32 +68,29 @@ router.delete('/:contactId', async (req, res, next) => {
     }
 });
 
-router.put('/:contactId', async (req, res, next) => {
-    try {
-        const { error } = contactSchema.validate(req.body);
-        if (error) {
-            error.status(400);
-            error.message = 'Missing fields';
-            throw error;
+router.put(
+    '/:contactId',
+    validationBody(updateContactSchema),
+    async (req, res, next) => {
+        try {
+            const { contactId } = req.params;
+
+            const updatedContact = await contactsOperations.updateContact(
+                contactId,
+                req.body
+            );
+
+            if (!updatedContact) {
+                const error = new Error('Not found');
+                error.status = 404;
+                throw error;
+            }
+
+            res.status(200).json(updatedContact);
+        } catch (error) {
+            next(error);
         }
-
-        const { contactId } = req.params;
-
-        const updatedContact = await contactsOperations.updateContact(
-            contactId,
-            req.body
-        );
-
-        if (!updatedContact) {
-            const error = new Error('Not found');
-            error.status = 404;
-            throw error;
-        }
-
-        res.status(200).json(updatedContact);
-    } catch (error) {
-        next(error);
     }
-});
+);
 
 module.exports = router;

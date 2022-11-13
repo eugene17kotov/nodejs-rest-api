@@ -93,16 +93,17 @@ const updateContact = async (contactId, body) => {
             return null;
         }
 
-        const updatedContact = { id: contactId, ...body };
-
-        contactsList.splice(indexUpdatedContact, 1, updatedContact);
+        contactsList[indexUpdatedContact] = {
+            ...contactsList[indexUpdatedContact],
+            ...body,
+        };
 
         const stringedContactsList = JSON.stringify(contactsList);
 
         await fs.writeFile(contactsPath, stringedContactsList, 'utf8');
 
-        return updatedContact;
-    } catch (error) {
+        return contactsList[indexUpdatedContact];
+    } catch (err) {
         console.error(err);
     }
 };
