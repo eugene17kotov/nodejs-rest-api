@@ -11,14 +11,14 @@ const { notFoundError } = require('../helpers/errors');
 
 const getContactsController = async (req, res) => {
     const { _id: userId } = req.user;
-    const { page = 1, limit = 5 } = req.query;
+    const { page = 1, limit = 5, favorite = false } = req.query;
 
     const pagination = {
         skip: (page - 1) * limit,
         limit: Number(limit) > 10 ? 10 : Number(limit),
     };
 
-    const contacts = await getContacts(userId, pagination);
+    const contacts = await getContacts(userId, pagination, favorite);
 
     res.status(200).json(contacts);
 };

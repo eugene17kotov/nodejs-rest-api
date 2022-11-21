@@ -1,7 +1,9 @@
 const Contact = require('../models/contact');
 
-const getContacts = async (userId, pagination) => {
-    return await Contact.find({ owner: userId }, '', pagination).populate(
+const getContacts = async (owner, pagination, favorite) => {
+    const payload = favorite === 'true' ? { owner, favorite } : { owner };
+
+    return await Contact.find(payload, '', pagination).populate(
         'owner',
         '_id email subscription'
     );
