@@ -8,4 +8,16 @@ const getCurrent = async userId => {
     return user;
 };
 
-module.exports = { getCurrent };
+const updateSubscription = async (userId, subscription) => {
+    const user = await User.findByIdAndUpdate(
+        userId,
+        { subscription },
+        { new: true }
+    ).catch(() => {
+        return null;
+    });
+
+    return user;
+};
+
+module.exports = { getCurrent, updateSubscription };

@@ -5,4 +5,8 @@ const userSchema = Joi.object({
     password: Joi.string().min(8).required(),
 });
 
-module.exports = { userSchema };
+const subscriptionSchema = Joi.object({
+    subscription: Joi.string().valid('starter', 'pro', 'business'),
+});
+
+module.exports = { userSchema, subscriptionSchema };
