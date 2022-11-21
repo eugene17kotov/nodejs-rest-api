@@ -1,19 +1,39 @@
-const { registration, login } = require('../services/authService');
+const { signup, login, logout } = require('../services/authService');
 
-const registrationController = async (req, res) => {
-    const { email, password } = req.body;
+const {
+    conflictError,
+    unauthorizedError,
+    loginAuthError,
+} = require('../helpers/errors');
 
-    await registration(email, password);
+const signupController = async (req, res) => {
+    const { email, password, subscription = 'starter' } = req.body;
 
-    res.json({ status: 'success' });
+    const newUser = await signup(email, password, subscription);
+
+    if (!newUser) throw conflictError;
+
+    res.status(201).json({ user: { email, subscription } });
 };
 
 const loginController = async (req, res) => {
-    const { email, password } = req.body;
+    const { email, password, subscription = 'starter' } = req.body;
 
     const token = await login(email, password);
 
-    res.json({ status: 'success', token });
+    if (!token) throw loginAuthError;
+
+    res.json({ token, user: { email, subscription } });
 };
 
-module.exports = { registrationController, loginController };
+const logoutController = async (req, res) => {
+    const { _id: userId } = req.user;
+
+    const result = await logout(userId);
+
+    if (!result) throw unauthorizedError;
+
+    res.status(204).json();
+};
+
+module.exports = { signupController, loginController, logoutController };

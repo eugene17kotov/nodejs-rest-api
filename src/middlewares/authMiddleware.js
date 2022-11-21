@@ -1,32 +1,30 @@
 const jwt = require('jsonwebtoken');
+const User = require('../models/user');
 
-const authMiddleware = (req, res, next) => {
-    const { tokenType, token } = req.headers['autorization'].split(' ');
+const { JWT_SECRET } = process.env;
 
-    if (!token) {
-        next({
-            status: 401,
-            message: `Please, provide a token`,
-        });
-    }
+const authMiddleware = async (req, res, next) => {
+    const { authorization = '' } = req.headers;
+    const [tokenType, token] = authorization.split(' ');
 
     try {
-        const user = jwt.decode(token, process.env.JWT_SECRET);
-        req.token = token;
+        if (tokenType !== 'Bearer') {
+            next({ status: 401, message: `Not authorized` });
+        }
+
+        const { _id: userId } = jwt.verify(token, JWT_SECRET);
+
+        const user = await User.findById(userId);
+
+        if (!user || !user.token) {
+            next({ status: 401, message: `Not authorized` });
+        }
+
         req.user = user;
         next();
     } catch (error) {
-        next({
-            status: 401,
-            message: `Invalid token`,
-        });
+        next({ status: 401, message: `Not authorized` });
     }
 };
 
 module.exports = { authMiddleware };
-
-// if (!user) {
-//     const error = new Error(`User with email "${email}" not found`);
-//     error.status = 401;
-//     throw error;
-// }

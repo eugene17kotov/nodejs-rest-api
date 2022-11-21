@@ -1,33 +1,37 @@
-const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
-const registration = async (email, password) => {
-    const user = new User({ email, password });
+const { JWT_SECRET } = process.env;
 
-    await user.save();
+const signup = async (email, password, subscription) => {
+    if (await User.findOne({ email })) return null;
+
+    const newUser = new User({ email, password, subscription });
+    await newUser.hashPassword(password);
+    newUser.save();
+
+    return newUser;
 };
 
 const login = async (email, password) => {
     const user = await User.findOne({ email });
-
-    if (!user) {
-        const error = new Error(`User with email "${email}" not found`);
-        error.status = 401;
-        throw error;
-    }
-
-    if (!(await bcrypt.compare(password, user.password))) {
-        const error = new Error(`Wrong password`);
-        error.status = 401;
-        throw error;
-    }
+    if (!user || !(await user.comparePassword(password))) return null;
 
     const { _id, createdAt } = user;
 
-    const token = jwt.sign({ _id, createdAt }, process.env.JWT_SECRET);
+    const token = jwt.sign({ _id, createdAt }, JWT_SECRET);
+
+    await User.findByIdAndUpdate(_id, { token });
 
     return token;
 };
 
-module.exports = { registration, login };
+const logout = async userId => {
+    const user = await User.findByIdAndUpdate(userId, { token: null });
+
+    if (!user) return null;
+
+    return user;
+};
+
+module.exports = { signup, login, logout };

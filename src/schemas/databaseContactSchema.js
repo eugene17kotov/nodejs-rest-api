@@ -2,10 +2,6 @@ const { Schema } = require('mongoose');
 
 const contactSchema = Schema(
     {
-        userId: {
-            type: String,
-            require: true,
-        },
         name: {
             type: String,
             required: [true, 'Set name for contact'],
@@ -19,6 +15,10 @@ const contactSchema = Schema(
         favorite: {
             type: Boolean,
             default: false,
+        },
+        owner: {
+            type: Schema.Types.ObjectId,
+            ref: 'user',
         },
     },
     { versionKey: false, timestamps: true }

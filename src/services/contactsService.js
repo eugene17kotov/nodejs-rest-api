@@ -1,15 +1,19 @@
 const Contact = require('../models/contact');
 
-const getContacts = async userId => {
-    return await Contact.find({ userId });
+const getContacts = async (userId, pagination) => {
+    return await Contact.find({ owner: userId }, '', pagination).populate(
+        'owner',
+        '_id email subscription'
+    );
 };
 
 const getContactById = async (contactId, userId) => {
-    const contact = await Contact.findOne({ _id: contactId, userId }).catch(
-        () => {
-            return null;
-        }
-    );
+    const contact = await Contact.findOne({
+        _id: contactId,
+        owner: userId,
+    }).catch(() => {
+        return null;
+    });
 
     return contact;
 };
@@ -18,12 +22,18 @@ const createContact = async (
     { name, email, phone, favorite = false },
     userId
 ) => {
-    return await Contact.create({ userId, name, email, phone, favorite });
+    return await Contact.create({
+        owner: userId,
+        name,
+        email,
+        phone,
+        favorite,
+    });
 };
 
 const updateContactById = async (contactId, body, userId) => {
     const updatedContact = await Contact.findOneAndUpdate(
-        { _id: contactId, userId },
+        { _id: contactId, owner: userId },
         body,
         { new: true }
     ).catch(() => {
@@ -35,7 +45,7 @@ const updateContactById = async (contactId, body, userId) => {
 
 const toggleFavoriteById = async (contactId, body, userId) => {
     const updatedContact = await Contact.findOneAndUpdate(
-        { _id: contactId, userId },
+        { _id: contactId, owner: userId },
         body,
         {
             new: true,
@@ -50,7 +60,7 @@ const toggleFavoriteById = async (contactId, body, userId) => {
 const deleteContactById = async (contactId, userId) => {
     const deletedContact = await Contact.findOneAndRemove({
         _id: contactId,
-        userId,
+        owner: userId,
     }).catch(() => {
         return null;
     });
