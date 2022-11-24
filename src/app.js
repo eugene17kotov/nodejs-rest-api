@@ -5,6 +5,7 @@ const cors = require('cors');
 const contactsRouter = require('./routes/api/contacts');
 const authRouter = require('./routes/api/auth');
 const usersRouter = require('./routes/api/users');
+const filesRouter = require('./routes/api/files');
 
 const app = express();
 
@@ -16,6 +17,7 @@ app.use(express.json());
 
 app.use('/users', authRouter);
 app.use('/users', usersRouter);
+app.use('/avatars', filesRouter);
 app.use('/api/contacts', contactsRouter);
 
 app.use((req, res) => {
