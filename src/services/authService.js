@@ -17,7 +17,7 @@ const login = async (email, password) => {
     const user = await User.findOne({ email });
     if (!user || !(await user.comparePassword(password))) return null;
 
-    const { _id, createdAt, subscription } = user;
+    const { _id, createdAt, subscription = 'starter' } = user;
 
     const token = jwt.sign({ _id, createdAt }, JWT_SECRET);
 
