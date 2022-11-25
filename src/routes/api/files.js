@@ -24,25 +24,18 @@ const uploadMiddleware = multer({ storage });
 
 // const { validationBody } = require('../../middlewares/validationBody');
 
-const {
-    uploadController,
-    downloadController,
-} = require('../../controllers/filesController');
+const { uploadController } = require('../../controllers/filesController');
 
 const ctrlWrapper = require('../../helpers/ctrlWrapper');
 
 // router.use(authMiddleware);
 
 router.post(
-    '/:filename',
+    '/upload',
     uploadMiddleware.single('avatar'),
     ctrlWrapper(uploadController)
 );
 
-router.post(
-    '/:filename',
-    downloadMiddleware.single('avatar'),
-    ctrlWrapper(downloadController)
-);
+router.use('/download', express.static(FILE_DIR));
 
 module.exports = router;
