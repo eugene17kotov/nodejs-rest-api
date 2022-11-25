@@ -17,13 +17,13 @@ const login = async (email, password) => {
     const user = await User.findOne({ email });
     if (!user || !(await user.comparePassword(password))) return null;
 
-    const { _id, createdAt } = user;
+    const { _id, createdAt, subscription } = user;
 
     const token = jwt.sign({ _id, createdAt }, JWT_SECRET);
 
     await User.findByIdAndUpdate(_id, { token });
 
-    return token;
+    return { token, subscription };
 };
 
 const logout = async userId => {
