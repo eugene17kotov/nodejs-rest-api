@@ -17,9 +17,9 @@ const signupController = async (req, res) => {
 };
 
 const loginController = async (req, res) => {
-    const { email, password, subscription = 'starter' } = req.body;
+    const { email, password } = req.body;
 
-    const token = await login(email, password);
+    const { token, subscription } = await login(email, password);
 
     if (!token) throw loginAuthError;
 
