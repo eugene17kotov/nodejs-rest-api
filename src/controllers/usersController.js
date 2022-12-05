@@ -29,9 +29,7 @@ const updateSubscriptionController = async (req, res) => {
     const { _id: userId, email } = req.user;
     const { subscription = 'starter' } = req.body;
 
-    const user = await updateSubscription(userId, subscription);
-
-    if (!user) throw unauthorizedError;
+    await updateSubscription(userId, subscription);
 
     res.status(200).json({ email, subscription });
 };
@@ -45,9 +43,8 @@ const updateAvatarController = async (req, res) => {
 
     try {
         const image = await Jimp.read(tempImagePath);
-        image.resize(250, 250).write(tempImagePath);
-
-        await fs.rename(tempImagePath, newImagePath);
+        await image.resize(250, 250);
+        await image.writeAsync(newImagePath);
     } catch (error) {
         await fs.unlink(tempImagePath);
         throw error;
@@ -55,9 +52,7 @@ const updateAvatarController = async (req, res) => {
 
     const avatarURL = path.join('avatars', newImageName);
 
-    const user = await updateAvatar(req.user._id, avatarURL);
-
-    if (!user) throw unauthorizedError;
+    await updateAvatar(req.user._id, avatarURL);
 
     res.json({ avatarURL });
 };
