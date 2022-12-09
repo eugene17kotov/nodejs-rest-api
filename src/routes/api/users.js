@@ -5,12 +5,17 @@ const router = express.Router();
 const { authMiddleware } = require('../../middlewares/authMiddleware');
 const { uploadMiddleware } = require('../../middlewares/uploadMiddleware');
 
-const { subscriptionSchema } = require('../../schemas/validationUserSchema');
-const { userSchema } = require('../../schemas/validationUserSchema');
+const {
+    userSchema,
+    subscriptionSchema,
+    resendEmailSchema,
+} = require('../../schemas/validationUserSchema');
 const { validationBody } = require('../../middlewares/validationBody');
 
 const {
     signupController,
+    verificationEmailController,
+    resendEmailController,
     loginController,
     logoutController,
 } = require('../../controllers/authController');
@@ -26,6 +31,17 @@ router.post(
     '/signup',
     validationBody(userSchema),
     ctrlWrapper(signupController)
+);
+
+router.get(
+    '/verify/:verificationToken',
+    ctrlWrapper(verificationEmailController)
+);
+
+router.post(
+    '/verify',
+    validationBody(resendEmailSchema),
+    ctrlWrapper(resendEmailController)
 );
 
 router.post('/login', validationBody(userSchema), ctrlWrapper(loginController));
